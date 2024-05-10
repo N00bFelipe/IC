@@ -3,7 +3,6 @@ import numpy as np
 
 def update(p):
     p = p + v * dt
-
     return p
 
 if __name__ == '__main__':

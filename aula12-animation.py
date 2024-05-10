@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 
-WORLDX, WORLDY = 10, 10 
+WORLDX, WORLDY = 10, 10
 
 def att_force(q, goal, katt=.01):
     return katt*(goal - q)
@@ -24,8 +24,10 @@ def rep_force(q, obs, R=3, krep=.1, axis=1):
 
 
 if __name__ == '__main__':
-    goal = np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
-    robot=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
+    
+    goal = (np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()]))
+    robot = (np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()]))
+    
     vel=1
 
     XX, YY = np.meshgrid(np.arange(0, WORLDX+.4, .4), np.arange(0, WORLDY+.4, .4))
@@ -38,8 +40,8 @@ if __name__ == '__main__':
     # Obstáculos: (x, y, r)
     obs = []
     Frep=0
-    for i in range(np.random.randint(5, 16)):
-        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 0.30*np.random.rand()+0.20])
+    for i in range(np.random.randint(7, 16)):
+        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 2*np.random.rand()+0.20])
         if(np.linalg.norm(goal-np.array([newobstacle[0], newobstacle[1]])) > newobstacle[2]+ 5*newobstacle[2] and np.linalg.norm(robot-np.array([newobstacle[0], newobstacle[1]])) > newobstacle[2]+1 ):
             obs.append(newobstacle)
             Frep += rep_force(XY, newobstacle)
@@ -70,16 +72,14 @@ if __name__ == '__main__':
     for i in range(len(obs)):
         obs_labels= ax.add_patch(patches.Circle((obs[i][0], obs[i][1]), obs[i][2], color='k'))
 
-    goal_label= ax.plot(goal[0], goal[1], 'og', markersize=10, label="Objetivo")
-    rob_label= ax.scatter(robot[0], robot[1], color='red', s=100, label="Robô") 
-    print(goal_label)
-    print(rob_label)
+    ax.plot(goal[0], goal[1], 'og', markersize=10, label="Objetivo")
+    ax.scatter(robot[0], robot[1], color='red', s=100, label="Robô") 
     ax.legend(loc='upper right')
 
     t, dist = 0, 0
     lastTime = time.time()
 
-    while np.linalg.norm(robot-goal) > 0.01:
+    while np.linalg.norm(robot-goal) > 0.1:
         now = time.time()
         dt = now - lastTime
         time_text.set_text(f"Tempo = {t:.2f}s   Distância = {dist:.2f}uc")
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         t = t + dt        
         lastTime = now
 
-        if(t > 25): 
+        if(t > 120): 
             print("Há um mínimo local")
             break
 
