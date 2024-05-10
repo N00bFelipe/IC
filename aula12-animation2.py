@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 
-WORLDX, WORLDY = 50, 50
-NumRob = 5
-vel=1
+WORLDX, WORLDY = 60, 30
+NumRob = 4
+vel=2
 
 def att_force(q, goal, katt=.01):
     return katt*(goal - q)
@@ -31,6 +31,8 @@ def random_color():
 
     return '#%02x%02x%02x' % (int(r*255), int(g*255), int(b*255))
 
+def unit_vector(vector):
+    return vector/np.linalg.norm(vector)
 
 if __name__ == '__main__':
 
@@ -45,15 +47,13 @@ if __name__ == '__main__':
             goals.append(newgoal)
             robots.append(newrobot)
             N+=1
-    
-          
 
     # Obstáculos: (x, y, r)
     N=0
-    while N < np.random.randint(10, 20):
-        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 2*np.random.rand()+0.20])
+    while N < np.random.randint(40, 60):
+        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 3*np.random.rand()+0.50])
 
-        if(all(np.linalg.norm(g-newobstacle[0:1]) > newobstacle[2]+ 5*newobstacle[2] for g in goals) and all(np.linalg(r-newobstacle[0:1]) > newobstacle[2]+1 for r in robots)):
+        if(all(np.linalg.norm(g - newobstacle[:2]) > newobstacle[2] + 5*newobstacle[2] for g in goals) and all(np.linalg.norm(r - newobstacle[:2]) > newobstacle[2] + 1 for r in robots)):
             obs.append(newobstacle)
             N+=1
 
@@ -61,43 +61,45 @@ if __name__ == '__main__':
     fig, ax = plt.subplots()
     ax.set_xlim(0, WORLDX)
     ax.set_ylim(0, WORLDY)
+    ax.set_aspect('equal')
     time_text = ax.text(0, -0.1, '', transform=ax.transAxes, ha='left')
 
     for ob in obs:
-        obs_labels= ax.add_patch(patches.Circle((ob[0], ob[1]), ob[2], color='k'))
+        ax.add_patch(patches.Circle((ob[0], ob[1]), ob[2], color='k'))
     
-    for g, r in goals, robots:
-        goal_label= ax.plot(goal[0], goal[1], 'og', markersize=10, label="Objetivo")
-        rob_label= ax.scatter(robot[0], robot[1], color='red', s=100, label="Robô") 
-    print(goal_label)
-    print(rob_label)
+    colors = []
+    for goal, robot in zip(goals, robots):
+        colors.append(random_color())
+        ax.scatter(goal[0], goal[1], color=colors[-1], s=100, label=f"Robô {len(colors)}")
+        ax.scatter(robot[0], robot[1], color='r', s=100) 
     ax.legend(loc='upper right')
 
     t, dist = 0, 0
     lastTime = time.time()
 
-    while np.linalg.norm(robot-goal) > 0.1:
+    while any(np.linalg.norm(robot-goal) > 0.5 for goal, robot in zip(goals, robots)):
         now = time.time()
         dt = now - lastTime
-        time_text.set_text(f"Tempo = {t:.2f}s   Distância = {dist:.2f}uc")
-        dist += vel*dt
+        time_text.set_text(f"Tempo = {t:.2f}s")
         
-        repulsion=0
-        for i in range(len(obs)):
-            repulsion += rep_force(robot, obs[i], 5*obs[i][2], axis=None)
-
-        f_direction = (att_force(robot, goal) + repulsion)/np.linalg.norm(att_force(robot, goal) + repulsion)
-
-        robot = robot + vel*dt*f_direction
+        for i in range(len(robots)):
+            if np.linalg.norm(robots[i]-goals[i]) < 0.5:
+                continue
+            force = att_force(robots[i], goals[i]) 
+            for ob in obs:
+                force += rep_force(robots[i], ob, 5*ob[2], axis=None)
+            for j in range(len(robots)):
+                if(i != j): force += rep_force(robots[i], np.append(robots[j], 0.5), R=1, axis=None)
+            robots[i] = robots[i] + vel*dt*unit_vector(force)
+            ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
  
-        ax.plot(robot[0], robot[1], 'or', markersize=1)
         plt.pause(.01)
         plt.draw()
 
         t = t + dt        
         lastTime = now
 
-        if(t > 120): 
+        if(t > 60): 
             print("Há um mínimo local")
             break
 
