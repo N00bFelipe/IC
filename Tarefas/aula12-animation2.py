@@ -49,13 +49,12 @@ if __name__ == '__main__':
             N+=1
 
     # Obstáculos: (x, y, r)
-    N=0
-    while N < np.random.randint(40, 60):
-        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 3*np.random.rand()+0.50])
+    N=np.random.randint(30, 40)
+    while len(obs) < N:
+        newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 4*np.random.rand()+0.5])
 
         if(all(np.linalg.norm(g - newobstacle[:2]) > newobstacle[2] + 5*newobstacle[2] for g in goals) and all(np.linalg.norm(r - newobstacle[:2]) > newobstacle[2] + 1 for r in robots)):
             obs.append(newobstacle)
-            N+=1
 
     plt.ion()
     fig, ax = plt.subplots()
@@ -70,8 +69,8 @@ if __name__ == '__main__':
     colors = []
     for goal, robot in zip(goals, robots):
         colors.append(random_color())
-        ax.scatter(goal[0], goal[1], color=colors[-1], s=100, label=f"Robô {len(colors)}")
-        ax.scatter(robot[0], robot[1], color='r', s=100) 
+        ax.scatter(goal[0], goal[1], color=colors[-1],  marker='*', s=100)
+        ax.scatter(robot[0], robot[1], color=colors[-1], s=100, label=f"Robô {len(colors)}") 
     ax.legend(loc='upper right')
 
     t, dist = 0, 0
