@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 import time
 
 WORLDX, WORLDY = 60, 30
-NumRob = 4
+NumRob = 5
 vel=2
 
 def att_force(q, goal, katt=.01):
@@ -43,13 +43,13 @@ if __name__ == '__main__':
         newgoal = np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
         newrobot = np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
 
-        if(all(np.linalg.norm(newgoal - g) > 1 for g in goals) and all(np.linalg.norm(newrobot - r) > 1 for r in robots)):
+        if(all(np.linalg.norm(newgoal - g) > 1 for g in goals) and all(np.linalg.norm(newrobot - r) > 1 for r in robots) and np.linalg.norm(newgoal - newrobot) > WORLDX/3):
             goals.append(newgoal)
             robots.append(newrobot)
             N+=1
 
     # Obstáculos: (x, y, r)
-    N=np.random.randint(30, 40)
+    N=np.random.randint(10, 20)
     while len(obs) < N:
         newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 4*np.random.rand()+0.5])
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     ax.set_xlim(0, WORLDX)
     ax.set_ylim(0, WORLDY)
     ax.set_aspect('equal')
-    time_text = ax.text(0, -0.1, '', transform=ax.transAxes, ha='left')
+    time_text = ax.text(0, -0.2, '', transform=ax.transAxes, ha='left')
 
     for ob in obs:
         ax.add_patch(patches.Circle((ob[0], ob[1]), ob[2], color='k'))
@@ -81,6 +81,9 @@ if __name__ == '__main__':
         dt = now - lastTime
         time_text.set_text(f"Tempo = {t:.2f}s")
         
+        if round(np.floor(t+0.5), 0)%10 == 0:
+            plt.savefig(f"subplot t={t:.0f}s.png")
+            
         for i in range(len(robots)):
             if np.linalg.norm(robots[i]-goals[i]) < 0.5:
                 continue
@@ -102,4 +105,5 @@ if __name__ == '__main__':
             print("Há um mínimo local")
             break
 
+    plt.savefig(f"subplot t={t:.0f}s.png")
     plt.show(block=True)
