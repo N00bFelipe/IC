@@ -114,5 +114,5 @@ if __name__ == '__main__':
             print("Há um mínimo local")
             break
 
-    plt.savefig(f"subplot t={t:.0f}s.png")
+    # plt.savefig(f"subplot t={t:.0f}s.png")
     plt.show(block=True)
