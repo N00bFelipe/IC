@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 import time
 
 WORLDX, WORLDY = 60, 30
-NumRob = 5
+NumRob = 10
 vel=2
 
 def att_force(q, goal, katt=.01):
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     ax.set_xlim(0, WORLDX)
     ax.set_ylim(0, WORLDY)
     ax.set_aspect('equal')
-    time_text = ax.text(0, -0.2, '', transform=ax.transAxes, ha='left')
+    time_text = ax.text(0, -0.1, '', transform=ax.transAxes, ha='left')
 
     for ob in obs:
         ax.add_patch(patches.Circle((ob[0], ob[1]), ob[2], color='k'))
@@ -70,8 +70,11 @@ if __name__ == '__main__':
     for goal, robot in zip(goals, robots):
         colors.append(random_color())
         ax.scatter(goal[0], goal[1], color=colors[-1],  marker='*', s=100)
-        ax.scatter(robot[0], robot[1], color=colors[-1], s=100, label=f"Robô {len(colors)}") 
-    ax.legend(loc='upper right')
+        ax.scatter(robot[0], robot[1], color=colors[-1], marker='s', s=50, label=f"Robô {len(colors)}")
+
+    robot_plot = ax.scatter(-1, -1)
+    # ax.legend(loc='upper right')
+    plt.pause(3)
 
     t, dist = 0, 0
     lastTime = time.time()
@@ -81,9 +84,10 @@ if __name__ == '__main__':
         dt = now - lastTime
         time_text.set_text(f"Tempo = {t:.2f}s")
         
-        if round(np.floor(t+0.5), 0)%10 == 0:
-            plt.savefig(f"subplot t={t:.0f}s.png")
-            
+        # Salvar capturas 
+        # if round(np.floor(t+0.5), 0)%10 == 0:
+        #     fig.savefig(f"subplot t={t:.0f}s.png")
+
         for i in range(len(robots)):
             if np.linalg.norm(robots[i]-goals[i]) < 0.5:
                 continue
@@ -93,15 +97,20 @@ if __name__ == '__main__':
             for j in range(len(robots)):
                 if(i != j): force += rep_force(robots[i], np.append(robots[j], 0.5), R=1, axis=None)
             robots[i] = robots[i] + vel*dt*unit_vector(force)
-            ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
- 
-        plt.pause(.01)
+            # Mostrar trajeto 
+            # ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
+
+        robot_plot.set_color(colors)  
+        robot_plot.set_sizes(np.full(len(robots), 10))
+        robot_plot.set_offsets([[robot[0], robot[1]] for robot in robots])
+
+        plt.pause(0.01)
         plt.draw()
 
-        t = t + dt        
-        lastTime = now
+        t = t + dt      
+        lastTime = now + 0.01
 
-        if(t > 60): 
+        if(t > 40): 
             print("Há um mínimo local")
             break
 
