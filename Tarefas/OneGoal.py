@@ -40,16 +40,16 @@ if __name__ == '__main__':
 
     N=0
     while N < NumRob:
-        newgoal = np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
+        newgoal = np.array([WORLDX/2, WORLDY/2])
         newrobot = np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand()])
 
-        if(all(np.linalg.norm(newgoal - g) > 1 for g in goals) and all(np.linalg.norm(newrobot - r) > 1 for r in robots) and np.linalg.norm(newgoal - newrobot) > WORLDX/3):
+        if(all(np.linalg.norm(newrobot - r) > 1 for r in robots) and np.linalg.norm(newgoal - newrobot) > WORLDX/4):
             goals.append(newgoal)
             robots.append(newrobot)
             N+=1
 
     # Obstáculos: (x, y, r)
-    N=np.random.randint(10, 20)
+    N=np.random.randint(5, 10)
     while len(obs) < N:
         newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 4*np.random.rand()+0.5])
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         t = t + dt      
         lastTime = now + 0.01
 
-        if(t > 40): 
+        if(t > 30): 
             print("Há um mínimo local")
             break
 
