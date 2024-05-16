@@ -24,7 +24,7 @@ def rep_force(q, obs, R=3, krep=.1, axis=1):
     
     return krep*rep
 
-def random_color():
+def randomColor():
     r = np.random.rand()
     g = np.random.rand()
     b = np.random.rand()
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     
     colors = []
     for goal, robot in zip(goals, robots):
-        colors.append(random_color())
+        colors.append(randomColor())
         ax.scatter(goal[0], goal[1], color=colors[-1],  marker='*', s=100)
         ax.scatter(robot[0], robot[1], color=colors[-1], marker='s', s=50, label=f"Robô {len(colors)}")
 
