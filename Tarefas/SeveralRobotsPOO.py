@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-numbRob = 5
-numObs = 20
+numbRob = 10
+numObs = 10
 rangeGoal = 0.5
 deltatT = 0.1
 WORLDX, WORLDY = 60, 30
@@ -15,8 +15,15 @@ def randomColor():
 
     return '#%02x%02x%02x' % (int(r*255), int(g*255), int(b*255))
 
+def obsCollum(start, end, number, size):
+    obstacles = []
+    dv = np.linalg.norm(np.array(end) - np.array(start))/(number-1)
+    for i in range(number):
+        obstacles.append(Obstacle([start[0], start[1] - i*dv], size))
+    return obstacles, dv
+
 class Obstacle:
-    def __init__(self, position, size, color = '#000000', rangeRep = 1):
+    def __init__(self, position, size, color = '#000000', rangeRep = .5):
         self.position = np.array(position)
         self.size = size
         self.color = color
@@ -57,27 +64,44 @@ class Robot(Obstacle):
     def attForce(self, katt = 0.01):
         self.force = katt*(self.goal - self.position)
 
-    def repForce(self, obs, krep=.1):
-        # Obstáculo: (x, y, r)
+    def repForce(self, obs, krep = .01):
         for ob in obs:
-            d = self.distFromAnother(ob)
-            if d < ob.rangeRep + ob.size and ob is not self:
+            v = self.position - ob.position
+            d = np.linalg.norm(v) - ob.size
+            R = ob.rangeRep + ob.size
+            if d < R and ob is not self:
                 dir = (self.position - ob.position)/d
-                self.force += krep*(1/d**2)*((1/d)-(1/(ob.rangeRep + ob.size)))*dir  
+                self.force += krep*(1/d**2)*((1/d)-(1/R))*(v/d)
+
+    def resetForce(self):
+        self.force = 0 
 
 if __name__ == '__main__':
 
     robots = []
     while len(robots) < numbRob:
-        robots.append(Robot([WORLDX*np.random.rand(), WORLDY*np.random.rand()], [WORLDX*np.random.rand(), WORLDY*np.random.rand()]))
+        robots.append(Robot([0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()], [WORLDX*(0.80 + 0.20*np.random.rand()), WORLDY*np.random.rand()]))
     
-    obstacles = []
-    while len(obstacles) < numObs:
-        newObs = Obstacle([WORLDX*np.random.rand(), WORLDY*np.random.rand()], 4*np.random.rand()+0.5)
+    # Obstáculos aleatórios
+    # obstacles = []
+    # while len(obstacles) < numObs:
+    #     newObs = Obstacle([WORLDX*np.random.rand(), WORLDY*np.random.rand()], 4*np.random.rand()+0.5)
 
-        if all(robot.distFromAnother(newObs) > newObs.size + robot.size for robot in robots) and all(np.linalg.norm(robot.goal - newObs.position) > newObs.size + newObs.rangeRep for robot in robots):
-            obstacles.append(newObs)
-    
+    #     if all(robot.distFromAnother(newObs) > newObs.size + robot.size for robot in robots) and all(np.linalg.norm(robot.goal - newObs.position) > newObs.size + 2*newObs.rangeRep for robot in robots):
+    #         obstacles.append(newObs)
+
+    #Coluna de Obstáculo
+    i = 1
+    obs = []
+    obstacles, dv = obsCollum([0.25*WORLDX, WORLDY], [0.25*WORLDX, 0], 10, 1)
+    while 0.25 + 0.1*i <= 0.75:
+        if i%2 != 0:
+            obs, _ = obsCollum([(0.25 + 0.1*i)*WORLDX, WORLDY - dv/2], [(0.25 + 0.1*i)*WORLDX, -dv/2], 10, 1)
+        else:
+            obs, _ = obsCollum([(0.25 + 0.1*i)*WORLDX, WORLDY], [(0.25 + 0.1*i)*WORLDX, 0], 10, 1)
+        obstacles.extend(obs)
+        i += 1
+
     # Gráfico =======================================================================================================
     plt.ion()
     fig, ax = plt.subplots()
@@ -86,7 +110,7 @@ if __name__ == '__main__':
     ax.set_aspect('equal')
 
     for obs in obstacles:
-        ax.add_patch(patches.Circle(obs.position, obs.size, color = obs.color))
+        ax.add_patch(patches.Circle((obs.position[0], obs.position[1]), obs.size, color = obs.color))
     
     for robot in robots:
         ax.scatter(robot.goal[0], robot.goal[1], color = robot.color,  marker = '*', s=100)
@@ -118,6 +142,7 @@ if __name__ == '__main__':
             robot.repForce(obstacles)
             robot.repForce(robots)
             robot.moving(deltatT)
+            robot.resetForce()
             
             # Mostrar trajeto 
             # ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
