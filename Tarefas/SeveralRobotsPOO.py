@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-numbRob = 25
+numbRob = 15
 numObs = 10
 rangeGoal = 0.5
-deltatT = 0.1
+deltaT = 0.1
 WORLDX, WORLDY = 60, 30
 
 def randomColor():
@@ -39,27 +39,41 @@ class Robot(Obstacle):
 
     NumOfRobots = 0
 
-    def __init__(self, start, goal, size = 0.2, v = 0.5, a = 0, vMax = 2, aMax = 2, color = None, label = None):
-        Obstacle.__init__(self, start, size,  randomColor() if color == None else color, 0.2 )
+    def __init__(self, start, goal, size = 0.2, v = 2, vMax = 4, aMax = 1.5, rangeRep = 1, color = None, label = None):
+        Obstacle.__init__(self, start, size,  randomColor() if color == None else color, rangeRep)
         Robot.NumOfRobots += 1
         self.start = np.array(start)
         self.goal = np.array(goal)
         self.force = 0
-        self.velocity = max(v, vMax)
-        self.maxVelocity = vMax
-        self.aceleration = max(a, aMax)
-        self.maxAceleration = aMax
+        self.velocity = min(abs(v), vMax)
+        self.vMax = vMax
+        self.aceleration = 0
+        self.aMax = aMax
         self.label = f'Robot {Robot.NumOfRobots}' if label == None else label
     
     def setVelocity(self, v):
-        self.velocity = max(v, self.vMax)
+        self.velocity = min(abs(v), self.vMax)
 
     def setAcceleration(self, a):
-        self.aceleration = max(a, self.aMax)
+        self.aceleration = a if abs(a) <= self.aMax else self.aMax*a/abs(a)
 
-    def moving(self, dt):
+    def toAccelerate(self, dt, obstacles):
+        for obs in obstacles:
+            if obs is self:
+                continue
+            if self.distFromAnother(obs) < 3:
+                self.setAcceleration(-self.aMax)
+                break
+            else:
+                self.setAcceleration(self.aMax)
+        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), 1)) 
+
+    def moving(self, dt, obstacles):
+        self.attForce()
+        self.repForce(obstacles)
+        self.toAccelerate(dt, obstacles)
         dir = self.force/np.linalg.norm(self.force)
-        self.position += self.velocity*dt*dir + self.aceleration*dt*dt*dir/2
+        self.position += self.velocity*dt*dir
 
     def distFromAnother(self, another):
         return np.linalg.norm(self.position - another.position)
@@ -70,13 +84,12 @@ class Robot(Obstacle):
     def attForce(self, katt = 0.01):
         self.force = katt*(self.goal - self.position)
 
-    def repForce(self, obs, krep = 0.02):
+    def repForce(self, obs, krep = 0.01):
         for ob in obs:
             v = self.position - ob.position
             d = np.linalg.norm(v) - ob.size
             R = ob.rangeRep + ob.size
             if d < R and ob is not self:
-                dir = (self.position - ob.position)/d
                 self.force += krep*(1/d**2)*((1/d)-(1/R))*(v/d)
 
     def resetForce(self):
@@ -89,7 +102,7 @@ if __name__ == '__main__':
         robots.append(Robot([0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()], [WORLDX*(0.80 + 0.20*np.random.rand()), WORLDY*np.random.rand()]))
     
     #"Matriz" de Obstáculos
-    obstacles =  obsCollum([0.25*WORLDX, WORLDY], [0.75*WORLDX, 0], 10, 6, 1)
+    obstacles =  obsCollum([0.4*WORLDX, WORLDY], [0.60*WORLDX, 0], 10, 4, 1.2)
 
     # Obstáculos aleatórios
     # obstacles = []
@@ -136,10 +149,7 @@ if __name__ == '__main__':
             if robot.pick():
                 continue
 
-            robot.attForce()
-            robot.repForce(obstacles)
-            robot.repForce(robots)
-            robot.moving(deltatT)
+            robot.moving(deltaT, obstacles + robots)
             robot.resetForce()
             
             # Mostrar trajeto 
@@ -153,7 +163,7 @@ if __name__ == '__main__':
         plt.draw()
 
         i+=1
-        if(i > 700): 
+        if(i > 1000): 
             print("Number of iterations exceeded")
             break
 
