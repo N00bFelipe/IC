@@ -2,10 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-numbRob = 15
+numbRob = 1
 numObs = 10
 rangeGoal = 0.5
 deltaT = 0.1
+defVelMax = 4
+defVelMin = 1
+defRadiusAcce = 4
+defAcceMax = 3
 WORLDX, WORLDY = 60, 30
 
 def randomColor():
@@ -16,9 +20,17 @@ def randomColor():
     return '#%02x%02x%02x' % (int(r*255), int(g*255), int(b*255))
 
 def obsCollum(start, end, rows, colluns, size):
+    if colluns > 1 and rows > 1:
+        dr = np.linalg.norm(end[1] - start[1])/(rows - 1)
+        dc = np.linalg.norm(end[0] - start[0])/(colluns -  1)
+    elif rows <= 1 and colluns > 1: 
+        dr = 0
+        dc = np.linalg.norm(end[0] - start[0])/(colluns -  1)
+    elif rows > 1 and colluns <=1: 
+        dr = np.linalg.norm(end[1] - start[1])/(rows - 1)
+        dc = 0
+    else: dr = dc = 0
     obstacles = []
-    dc = np.linalg.norm(end[0] - start[0])/(colluns -  1)
-    dr = np.linalg.norm(end[1] - start[1])/(rows - 1)
     for j in range(colluns):
         for i in range(rows):
             if j%2 == 0:
@@ -39,16 +51,16 @@ class Robot(Obstacle):
 
     NumOfRobots = 0
 
-    def __init__(self, start, goal, size = 0.2, v = 2, vMax = 4, aMax = 1.5, rangeRep = 1, color = None, label = None):
+    def __init__(self, start, goal, size = 0.2, vMax = defVelMax, aMax = defAcceMax, rangeRep = 1, color = None, label = None):
         Obstacle.__init__(self, start, size,  randomColor() if color == None else color, rangeRep)
         Robot.NumOfRobots += 1
         self.start = np.array(start)
         self.goal = np.array(goal)
-        self.force = 0
-        self.velocity = min(abs(v), vMax)
-        self.vMax = vMax
+        self.velocity = 0
+        self.vMax = abs(vMax)
         self.aceleration = 0
         self.aMax = aMax
+        self.force = 0
         self.label = f'Robot {Robot.NumOfRobots}' if label == None else label
     
     def setVelocity(self, v):
@@ -58,10 +70,14 @@ class Robot(Obstacle):
         self.aceleration = a if abs(a) <= self.aMax else self.aMax*a/abs(a)
 
     def toAccelerate(self, dt, obstacles):
+        if self.velocity < 1:
+            self.setVelocity(max(min(self.velocity + self.aMax*dt, self.vMax), defVelMin))
+            return
+        
         for obs in obstacles:
             if obs is self:
                 continue
-            if self.distFromAnother(obs) < 3:
+            if self.distFromAnother(obs) < defRadiusAcce:
                 self.setAcceleration(-self.aMax)
                 break
             else:
@@ -78,7 +94,7 @@ class Robot(Obstacle):
     def distFromAnother(self, another):
         return np.linalg.norm(self.position - another.position)
     
-    def pick(self):
+    def arrived(self):
         return True if np.linalg.norm(self.position - self.goal) < rangeGoal else False
     
     def attForce(self, katt = 0.01):
@@ -102,7 +118,7 @@ if __name__ == '__main__':
         robots.append(Robot([0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()], [WORLDX*(0.80 + 0.20*np.random.rand()), WORLDY*np.random.rand()]))
     
     #"Matriz" de Obstáculos
-    obstacles =  obsCollum([0.4*WORLDX, WORLDY], [0.60*WORLDX, 0], 10, 4, 1.2)
+    obstacles =  obsCollum([0.4*WORLDX, WORLDY], [0.60*WORLDX, 0], 10, 2, 1.2)
 
     # Obstáculos aleatórios
     # obstacles = []
@@ -125,8 +141,8 @@ if __name__ == '__main__':
     for robot in robots:
         ax.scatter(robot.goal[0], robot.goal[1], color = robot.color,  marker = '*', s=100)
         ax.scatter(robot.start[0], robot.start[1], color = robot.color, marker = 's', s = 50, label = robot.label)
-
     robot_plot = ax.scatter(-1, -1)
+
     # ax.legend(loc='upper right')
     plt.pause(3)
 
@@ -137,23 +153,17 @@ if __name__ == '__main__':
     # Gráfico =======================================================================================================
 
     i = 0
-    while any(not robot.pick() for robot in robots):
-        
-        # Salvar capturas 
-        # if i == 100:
-        #     plt.savefig(f"subplot t={t:.0f}s.png")
-        #     i = 0
+    while any(not robot.arrived() for robot in robots):
 
         for robot in robots:
-
-            if robot.pick():
+            if robot.arrived():
                 continue
 
             robot.moving(deltaT, obstacles + robots)
             robot.resetForce()
             
             # Mostrar trajeto 
-            # ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
+            # ax.scatter(robot.position[0], robot.position[1], color = robot.color, s = 100*robot.size)
 
         robot_plot.set_color(colors)  
         robot_plot.set_sizes(sizes)
@@ -162,9 +172,14 @@ if __name__ == '__main__':
         plt.pause(0.01)
         plt.draw()
 
+        # Salvar capturas 
+        # if i % 50:
+        #     plt.savefig(f"subplot{i//50}.png")
+
         i+=1
         if(i > 1000): 
             print("Number of iterations exceeded")
             break
 
+    # plt.savefig(f"subplot.png")
     plt.show(block=True)
