@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-numbRob = 1
+numbRob = 8
 numObs = 10
-rangeGoal = 0.5
+rangeGoal = 0.8
 deltaT = 0.1
 defVelMax = 4
-defVelMin = 1
+defVelMin = 2
 defRadiusAcce = 4
 defAcceMax = 3
 WORLDX, WORLDY = 60, 30
@@ -26,7 +26,7 @@ def obsCollum(start, end, rows, colluns, size):
     elif rows <= 1 and colluns > 1: 
         dr = 0
         dc = np.linalg.norm(end[0] - start[0])/(colluns -  1)
-    elif rows > 1 and colluns <=1: 
+    elif rows > 1 and colluns <= 1: 
         dr = np.linalg.norm(end[1] - start[1])/(rows - 1)
         dc = 0
     else: dr = dc = 0
@@ -51,11 +51,12 @@ class Robot(Obstacle):
 
     NumOfRobots = 0
 
-    def __init__(self, start, goal, size = 0.2, vMax = defVelMax, aMax = defAcceMax, rangeRep = 1, color = None, label = None):
+    def __init__(self, start, goals, size = 0.2, vMax = defVelMax, aMax = defAcceMax, rangeRep = 1, color = None, label = None):
         Obstacle.__init__(self, start, size,  randomColor() if color == None else color, rangeRep)
         Robot.NumOfRobots += 1
         self.start = np.array(start)
-        self.goal = np.array(goal)
+        self.whichGoal = 0
+        self.goals = [np.array(goal) for goal in goals]
         self.velocity = 0
         self.vMax = abs(vMax)
         self.aceleration = 0
@@ -70,7 +71,7 @@ class Robot(Obstacle):
         self.aceleration = a if abs(a) <= self.aMax else self.aMax*a/abs(a)
 
     def toAccelerate(self, dt, obstacles):
-        if self.velocity < 1:
+        if self.velocity < defVelMin:
             self.setVelocity(max(min(self.velocity + self.aMax*dt, self.vMax), defVelMin))
             return
         
@@ -82,7 +83,7 @@ class Robot(Obstacle):
                 break
             else:
                 self.setAcceleration(self.aMax)
-        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), 1)) 
+        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), defVelMin)) 
 
     def moving(self, dt, obstacles):
         self.attForce()
@@ -95,10 +96,14 @@ class Robot(Obstacle):
         return np.linalg.norm(self.position - another.position)
     
     def arrived(self):
-        return True if np.linalg.norm(self.position - self.goal) < rangeGoal else False
+        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < rangeGoal and self.whichGoal == len(self.goals) - 1:
+            return True
+        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < rangeGoal:
+            self.whichGoal += 1 if self.whichGoal + 1 < len(self.goals) else 0
+            return False
     
     def attForce(self, katt = 0.01):
-        self.force = katt*(self.goal - self.position)
+        self.force = katt*(self.goals[self.whichGoal] - self.position)
 
     def repForce(self, obs, krep = 0.01):
         for ob in obs:
@@ -115,10 +120,12 @@ if __name__ == '__main__':
 
     robots = []
     while len(robots) < numbRob:
-        robots.append(Robot([0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()], [WORLDX*(0.80 + 0.20*np.random.rand()), WORLDY*np.random.rand()]))
+        start = [0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()]
+        robots.append(Robot(start, [[0.9*WORLDX, 0.9*WORLDY], [0.1*WORLDX, 0.1*WORLDY],[0.9*WORLDX, 0.1*WORLDY], start]))
+        # robots.append(Robot([0.20*WORLDX*np.random.rand(), WORLDY*np.random.rand()], [[WORLDX*(0.80 + 0.20*np.random.rand()), WORLDY*np.random.rand()]]))
     
     #"Matriz" de Obstáculos
-    obstacles =  obsCollum([0.4*WORLDX, WORLDY], [0.60*WORLDX, 0], 10, 2, 1.2)
+    obstacles =  obsCollum([0.4*WORLDX, WORLDY], [0.60*WORLDX, 0], 10, 4, 1.2)
 
     # Obstáculos aleatórios
     # obstacles = []
@@ -139,8 +146,9 @@ if __name__ == '__main__':
         ax.add_patch(patches.Circle((obs.position[0], obs.position[1]), obs.size, color = obs.color))
     
     for robot in robots:
-        ax.scatter(robot.goal[0], robot.goal[1], color = robot.color,  marker = '*', s=100)
         ax.scatter(robot.start[0], robot.start[1], color = robot.color, marker = 's', s = 50, label = robot.label)
+        for goal in robot.goals:
+            ax.scatter(goal[0], goal[1], color = robot.color,  marker = '*', s=100)
     robot_plot = ax.scatter(-1, -1)
 
     # ax.legend(loc='upper right')
@@ -177,7 +185,7 @@ if __name__ == '__main__':
         #     plt.savefig(f"subplot{i//50}.png")
 
         i+=1
-        if(i > 1000): 
+        if(i > 5000): 
             print("Number of iterations exceeded")
             break
 
