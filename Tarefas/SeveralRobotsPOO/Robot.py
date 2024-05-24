@@ -30,15 +30,22 @@ class Robot(Obstacle):
             self.setVelocity(max(min(self.velocity + self.aMax*dt, self.vMax), PRT.VELMIN))
             return
         
+        self.setAcceleration(self.aMax)
         for obs in obstacles:
             if obs is self:
                 continue
+            
             if self.distFromAnother(obs) < PRT.RADIUSACCE:
-                self.setAcceleration(-self.aMax)
-                break
-            else:
-                self.setAcceleration(self.aMax)
-        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), PRT.VELMIN)) 
+                normSelfStart = np.linalg.norm(self.goals[self.whichGoal] - self.position)
+                normSelfObs = np.linalg.norm(obs.position - self.position)
+                dot = np.dot(self.goals[self.whichGoal] - self.position, obs.position - self.position)
+                angle = np.arccos(dot/(normSelfObs*normSelfStart))
+
+                if np.abs(angle) <= PRT.ANGLE:
+                    self.setAcceleration(-self.aMax)
+                    break
+
+        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), PRT.VELMIN))
 
     def moving(self, dt, obstacles):
         self.attForce()

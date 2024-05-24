@@ -9,7 +9,7 @@ class Obstacle:
         self.rangeRep = rangeRep
 
     @classmethod
-    def obsMatrix(cls, start, end, rows, colluns, size):
+    def matrix(cls, start, end, rows, colluns, size):
         if colluns > 1 and rows > 1:
             dr = np.linalg.norm(end[1] - start[1])/(rows - 1)
             dc = np.linalg.norm(end[0] - start[0])/(colluns -  1)

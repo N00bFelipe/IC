@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import Parameters as PRT
 from Obstacle import Obstacle
 from Robot import Robot
-import Parameters as PRT
 
 if __name__ == '__main__':
 
@@ -14,7 +14,7 @@ if __name__ == '__main__':
         # robots.append(Robot([0.20*PRT.WORLDX*np.random.rand(), PRT.WORLDY*np.random.rand()], [[PRT.WORLDX*(0.80 + 0.20*np.random.rand()), PRT.WORLDY*np.random.rand()]]))
     
     #"Matriz" de Obstáculos
-    obstacles =  Obstacle.obsMatrix([0.4*PRT.WORLDX, PRT.WORLDY], [0.60*PRT.WORLDX, 0], 10, 2, 1.2)
+    obstacles =  Obstacle.matrix([0.4*PRT.WORLDX, PRT.WORLDY], [0.60*PRT.WORLDX, 0], 10, 2, 1.2)
 
     # Obstáculos aleatórios
     # obstacles = []
