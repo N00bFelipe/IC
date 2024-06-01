@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 
-WORLDX, WORLDY = 30, 60
+WORLDX, WORLDY = 60, 30
 NumRob = 5
 vel=2
 

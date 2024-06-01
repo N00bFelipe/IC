@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 
-WORLDX, WORLDY = 60, 30
+WORLDX, WORLDY = 30, 15
 NumRob = 10
 vel=2
 
@@ -35,6 +35,8 @@ def unit_vector(vector):
     return vector/np.linalg.norm(vector)
 
 if __name__ == '__main__':
+    XX, YY = np.meshgrid(np.arange(0, WORLDX+.4, .4), np.arange(0, WORLDY+.4, .4))
+    XY = np.dstack([XX, YY]).reshape(-1, 2)
 
     goals, robots, obs = [], [], []
 
@@ -49,12 +51,29 @@ if __name__ == '__main__':
             N+=1
 
     # Obstáculos: (x, y, r)
+    Frep=0
     N=np.random.randint(5, 10)
     while len(obs) < N:
         newobstacle=np.array([WORLDX*np.random.rand(), WORLDY*np.random.rand(), 4*np.random.rand()+0.5])
 
         if(all(np.linalg.norm(g - newobstacle[:2]) > newobstacle[2] + 5*newobstacle[2] for g in goals) and all(np.linalg.norm(r - newobstacle[:2]) > newobstacle[2] + 1 for r in robots)):
             obs.append(newobstacle)
+            Frep += rep_force(XY, newobstacle)
+
+    Frep_x = Frep[:,0]
+    Frep_y = Frep[:,1]  
+
+    Fatt = att_force(XY, goals[0])
+    Fatt_x = Fatt[:,0]
+    Fatt_y = Fatt[:,1]
+
+    Ft = Fatt + Frep
+
+    # Threshold para visualização
+    Ft = Ft / np.linalg.norm(Ft, axis=1).reshape((len(Ft), 1))
+
+    Ft_x = np.copy(Ft[:,0])
+    Ft_y = np.copy(Ft[:,1])
 
     plt.ion()
     fig, ax = plt.subplots()
@@ -63,6 +82,7 @@ if __name__ == '__main__':
     ax.set_aspect('equal')
     time_text = ax.text(0, -0.1, '', transform=ax.transAxes, ha='left')
 
+    quiver = ax.quiver(XX, YY, Ft_x, Ft_y, color='paleturquoise', label="Campo Potencial")
     for ob in obs:
         ax.add_patch(patches.Circle((ob[0], ob[1]), ob[2], color='k'))
     
@@ -101,7 +121,7 @@ if __name__ == '__main__':
             # ax.scatter(robots[i][0], robots[i][1], color = colors[i], s=10)
 
         robot_plot.set_color(colors)  
-        robot_plot.set_sizes(np.full(len(robots), 10))
+        robot_plot.set_sizes(np.full(len(robots), 20))
         robot_plot.set_offsets([[robot[0], robot[1]] for robot in robots])
 
         plt.pause(0.01)
@@ -110,7 +130,7 @@ if __name__ == '__main__':
         t = t + dt      
         lastTime = now + 0.01
 
-        if(t > 30): 
+        if(t > 10): 
             print("Há um mínimo local")
             break
 
