@@ -1,12 +1,12 @@
 from Obstacle import Obstacle
 import numpy as np
-import Parameters as PRT
+from Parameters import *
 
 class Robot(Obstacle):
 
     NumOfRobots = 0
 
-    def __init__(self, start, goals, size = 3, vMax = PRT.VELMAX, aMax = PRT.ACCEMAX, sensorRange = PRT.SENSOR_RANGE, color = None, label = None):
+    def __init__(self, start, goals, size = 3, vMax = VELMAX, aMax = ACCEMAX, sensorRange = SENSOR_RANGE, color = None, label = None):
         Obstacle.__init__(self, start, size,  self.randomColor() if color == None else color)
         Robot.NumOfRobots += 1
         self.start = np.array(start)
@@ -27,8 +27,8 @@ class Robot(Obstacle):
         self.aceleration = a if abs(a) <= self.aMax else self.aMax*a/abs(a)
 
     def toAccelerate(self, dt, obstacles):
-        if self.velocity < PRT.VELMIN:
-            self.setVelocity(max(min(self.velocity + self.aMax*dt, self.vMax), PRT.VELMIN))
+        if self.velocity < VELMIN:
+            self.setVelocity(max(min(self.velocity + self.aMax*dt, self.vMax), VELMIN))
             return
         
         self.setAcceleration(self.aMax)
@@ -42,11 +42,11 @@ class Robot(Obstacle):
                 dot = np.dot(self.goals[self.whichGoal] - self.position, obs.position - self.position)
                 angle = np.arccos(dot/(normSelfObs*normSelfStart))
 
-                if np.abs(angle) <= PRT.ANGLE:
+                if np.abs(angle) <= ANGLE:
                     self.setAcceleration(-self.aMax)
                     break
 
-        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), PRT.VELMIN))
+        self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), VELMIN))
 
     def moving(self, dt, obstacles):
         self.attForce()
@@ -59,9 +59,9 @@ class Robot(Obstacle):
         return np.linalg.norm(self.position - another.position)
     
     def arrived(self):
-        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < PRT.RANGEGOAL and self.whichGoal == len(self.goals) - 1:
+        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < RANGEGOAL and self.whichGoal == len(self.goals) - 1:
             return True
-        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < PRT.RANGEGOAL:
+        if np.linalg.norm(self.position - self.goals[self.whichGoal]) < RANGEGOAL:
             self.whichGoal += 1 if self.whichGoal + 1 < len(self.goals) else 0
             return False
     

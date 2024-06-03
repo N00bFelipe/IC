@@ -1,5 +1,5 @@
 import numpy as np
-import Parameters as PRT
+from Parameters import *
 from Obstacle import Obstacle
 from Robot import Robot
 import pygame
@@ -10,19 +10,20 @@ pygame.init()
 clock = pygame.time.Clock()
 paused = False
 
-screen = pygame.display.set_mode((PRT.WIDTH, PRT.HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Simulation')
 
 robots = []
-while len(robots) < PRT.NUMROB:
-    start = [0.20*PRT.WIDTH*np.random.rand(), PRT.HEIGHT*np.random.rand()]
-    robots.append(Robot(start, [[0.9*PRT.WIDTH, 0.1*PRT.HEIGHT], [0.1*PRT.WIDTH, 0.9*PRT.HEIGHT], [0.9*PRT.WIDTH, 0.9*PRT.HEIGHT], start]))
+while len(robots) < NUMROB:
+    start = [0.20*WIDTH*np.random.rand(), HEIGHT*np.random.rand()]
+    robots.append(Robot(start, [[0.9*WIDTH, 0.1*HEIGHT], [0.1*WIDTH, 0.9*HEIGHT], [0.9*WIDTH, 0.9*HEIGHT], start]))
 
-obstacles =  Obstacle.matrix([0.4*PRT.WIDTH, PRT.HEIGHT], [0.60*PRT.WIDTH, 0], 10, 2, 20)
+obstacles =  Obstacle.matrix([0.4*WIDTH, HEIGHT], [0.60*WIDTH, 0], 10, 2, 20)
+obstacles.append(Obstacle([*pygame.mouse.get_pos()], SIZEMOUSE))
+mouse_ind = len(obstacles) - 1
 
 while True:
-    screen.fill((255, 255, 255))
-    clock.tick(PRT.FPS)
+    clock.tick(FPS)
     
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -31,13 +32,27 @@ while True:
         elif event.type == KEYDOWN:
             if event.key == K_SPACE:
                 paused = not paused 
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                obstacles.append(Obstacle([*pygame.mouse.get_pos()], SIZEMOUSE))
+            if event.button == 3 and len(obstacles) > mouse_ind + 1:
+                obstacles.pop()
+                
+
+    obstacles[mouse_ind].position = np.array([*pygame.mouse.get_pos()])
 
     if not paused:
+        screen.fill((255, 255, 255))
+
+        
         for robot in robots:
             if robot.arrived():
                 continue
-            robot.moving(PRT.DELTAT, obstacles + robots)
+            robot.moving(DELTAT, obstacles + robots)
             robot.resetForce()
+    else:
+        screen.fill((230, 230, 230))
+
 
     for obj in robots + obstacles:
         pygame.draw.circle(screen, obj.color, obj.position, obj.size)
@@ -46,7 +61,4 @@ while True:
             for goal, i in zip(obj.goals, range(len(obj.goals) - 1)):
                 pygame.draw.rect(screen, robot.color, (*goal, 10, 10))
 
-
-    pygame.display.update()
-        
-    
+    pygame.display.flip()
