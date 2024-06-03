@@ -8,7 +8,7 @@ from sys import exit
 
 pygame.init()
 clock = pygame.time.Clock()
-paused = False
+paused = True
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Simulation')
@@ -44,7 +44,6 @@ while True:
     if not paused:
         screen.fill((255, 255, 255))
 
-        
         for robot in robots:
             if robot.arrived():
                 continue
@@ -53,12 +52,11 @@ while True:
     else:
         screen.fill((230, 230, 230))
 
-
     for obj in robots + obstacles:
         pygame.draw.circle(screen, obj.color, obj.position, obj.size)
         if isinstance(obj, Robot):
             pygame.draw.rect(screen, obj.color, (*obj.start, 10, 10))
             for goal, i in zip(obj.goals, range(len(obj.goals) - 1)):
-                pygame.draw.rect(screen, robot.color, (*goal, 10, 10))
+                pygame.draw.rect(screen, (255, 223, 0), (*goal, 10, 10))
 
     pygame.display.flip()
