@@ -42,10 +42,10 @@ class Robot(Obstacle):
                 dot = np.dot(self.goals[self.whichGoal] - self.position, obs.position - self.position)
                 angle = np.arccos(dot/(normSelfObs*normSelfStart))
 
-                if np.abs(angle) <= ANGLE:
+                if angle <= ANGLE:
                     self.setAcceleration(-self.aMax)
                     break
-
+ 
         self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), VELMIN))
 
     def moving(self, dt, obstacles):
@@ -56,7 +56,7 @@ class Robot(Obstacle):
         self.position += self.velocity*dt*dir
 
     def distFromAnother(self, another):
-        return np.linalg.norm(self.position - another.position)
+        return np.linalg.norm(self.position - another.position) - (self.size + another.size)
     
     def arrived(self):
         if np.linalg.norm(self.position - self.goals[self.whichGoal]) < RANGEGOAL and self.whichGoal == len(self.goals) - 1:
@@ -68,11 +68,12 @@ class Robot(Obstacle):
     def attForce(self, katt = 0.001):
         self.force = katt*(self.goals[self.whichGoal] - self.position)
 
-    def repForce(self, obs, krep = 10):
+
+    def repForce(self, obs, krep = 1):
         for ob in obs:
             v = self.position - ob.position
-            d = np.linalg.norm(v) - ob.size
-            R = self.sensorRange + ob.size
+            d = self.distFromAnother(ob)
+            R = self.sensorRange
             if d < R and ob is not self:
                 self.force += krep*(1/d**2)*((1/d)-(1/R))*(v/d)
 
@@ -86,3 +87,11 @@ class Robot(Obstacle):
         b = np.random.rand()
 
         return (int(r*255), int(g*255), int(b*255))
+    
+    # def repForce(self, obs, krep = 10): # Repulsão antiga
+    #     for ob in obs:
+    #         v = self.position - ob.position
+    #         d = np.linalg.norm(v) - ob.size
+    #         R = self.sensorRange + ob.size
+    #         if d < R and ob is not self:
+    #             self.force += krep*(1/d**2)*((1/d)-(1/R))*(v/d)

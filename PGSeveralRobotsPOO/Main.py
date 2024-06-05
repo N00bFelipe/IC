@@ -18,8 +18,8 @@ while len(robots) < NUMROB:
     start = [0.20*WIDTH*np.random.rand(), HEIGHT*np.random.rand()]
     robots.append(Robot(start, [[0.9*WIDTH, 0.1*HEIGHT], [0.1*WIDTH, 0.9*HEIGHT], [0.9*WIDTH, 0.9*HEIGHT], start]))
 
-obstacles =  Obstacle.matrix([0.4*WIDTH, HEIGHT], [0.60*WIDTH, 0], 10, 2, 20)
-obstacles.append(Obstacle([*pygame.mouse.get_pos()], SIZEMOUSE))
+obstacles =  Obstacle.matrix([0.35*WIDTH, HEIGHT], [0.65*WIDTH, 0], 10, 2, 20)
+obstacles.append(Obstacle([*pygame.mouse.get_pos()], 10))
 mouse_ind = len(obstacles) - 1
 
 while True:
@@ -34,9 +34,15 @@ while True:
                 paused = not paused 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                obstacles.append(Obstacle([*pygame.mouse.get_pos()], SIZEMOUSE))
-            if event.button == 3 and len(obstacles) > mouse_ind + 1:
-                obstacles.pop()
+                obstacles.append(Obstacle([*pygame.mouse.get_pos()], obstacles[mouse_ind].size))
+            if event.button == 3: 
+                if len(obstacles) > mouse_ind + 1:
+                    obstacles.pop()
+            if event.button == 4:
+                obstacles[mouse_ind].size += 5
+            if event.button == 5:
+                if obstacles[mouse_ind].size > 5:
+                    obstacles[mouse_ind].size -= 5
                 
 
     obstacles[mouse_ind].position = np.array([*pygame.mouse.get_pos()])
