@@ -3,14 +3,12 @@ import numpy as np
 WIDTH = 640
 HEIGHT = 480
 FPS = 60
-NUMROB = 5
+NUMROB = 7
 ORIENTATION = np.deg2rad(0)
 SIZEROBOT = 15
 RANGEGOAL = 25
 DELTAT = 0.1
-VELMAX = 25
-VELMIN = 4
-ACCEMAX = 10
+VELMAX = 10
 OMEGA = np.deg2rad(30)
-ANGLE = np.deg2rad(80)
+ANGLE = np.deg2rad(120)
 SENSOR_RANGE = 100
