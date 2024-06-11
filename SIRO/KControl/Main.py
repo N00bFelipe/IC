@@ -16,13 +16,13 @@ pygame.display.set_caption('Simulation')
 
 robots = []
 for i in range(13):
-    if i < 7:
-        robots.append(Robot((0.2*WIDTH, (1 + i)*HEIGHT/8), [(0, 0)], random.random()*360, color=(125, 125, 125)))
+    if i >= 7:
+        robots.append(Robot((0.2*WIDTH, (13 - i)*HEIGHT/7), [(0, 0)], random.random()*360, color=(0, 200, 200)))
     else:
-        robots.append(Robot((0.8*WIDTH, (-6 + i)*HEIGHT/7), [(0, 0)], random.random()*360, color=(125, 125, 125)))
+        robots.append(Robot((0.8*WIDTH, (1 + i)*HEIGHT/8), [(0, 0)], random.random()*360, color=(0, 200, 200)))
     robots[i].goals.pop()
 
-Robot.letters(robots, 'SOCIOS DO FUTURO')
+Robot.letters(robots, 'LAB DE SISTEMAS ROBOTICOS')
 
 obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 0, 0, 25)
 obstacles.append(Obstacle(pygame.mouse.get_pos(), 10))
@@ -54,7 +54,7 @@ while True:
     obstacles[mouse_ind].position = Vector2(pygame.mouse.get_pos())
 
     if not paused:
-        screen.fill((255, 255, 255))
+        screen.fill((25, 25, 25))
     
         for robot in robots:
             robot.moving(DELTAT, obstacles + robots)
@@ -69,7 +69,7 @@ while True:
                 robot.updateGoal()
             pygame.time.delay(1000)
     else:
-        screen.fill((230, 230, 230))
+        screen.fill((20, 20, 20))
 
     for obj in robots + obstacles:
         if isinstance(obj, Robot):

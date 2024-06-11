@@ -42,6 +42,9 @@ class Robot(Obstacle):
         pygame.draw.circle(screen, self.color, self.position, self.size)
         pygame.draw.line(screen, (0, 0, 0), self.position, self.front, self.size//10)
 
+    def getGoal(self):
+        return self.goals[self.goal_index]
+
     def kControl(self, futureOri):
         rho = self.force.length()
         alpha = self.normalizeAngle(-self.orientation + math.atan2(self.force.y, self.force.x))
@@ -115,49 +118,50 @@ class Robot(Obstacle):
 
     @classmethod
     def letters(cls, robots, letters):
-        p0 = Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 - 10*SIZEROBOT)
-        p1 = Vector2(WIDTH/2, HEIGHT/2 - 10*SIZEROBOT)
-        p2 = Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 - 10*SIZEROBOT)
-        p3 = Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 - 5*SIZEROBOT)
-        p4 = Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2)
-        p5 = Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 + 5*SIZEROBOT)
-        p6 = Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 + 10*SIZEROBOT)
-        p7 = Vector2(WIDTH/2, HEIGHT/2 + 10*SIZEROBOT)
-        p8 = Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 + 10*SIZEROBOT)
-        p9 = Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 + 5*SIZEROBOT)
-        p10 = Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2)
-        p11 = Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 - 5*SIZEROBOT) 
-        p12 = Vector2(WIDTH/2, HEIGHT/2)
+        P = []
+        P.append(Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 - 8*SIZEROBOT)) 
+        P.append(Vector2(WIDTH/2, HEIGHT/2 - 8*SIZEROBOT))               
+        P.append(Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 - 8*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 - 4*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2))
+        P.append(Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 + 4*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 + 6*SIZEROBOT, HEIGHT/2 + 8*SIZEROBOT))
+        P.append(Vector2(WIDTH/2, HEIGHT/2 + 8*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 + 8*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 + 4*SIZEROBOT))
+        P.append(Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2))
+        P.append(Vector2(WIDTH/2 - 6*SIZEROBOT, HEIGHT/2 - 4*SIZEROBOT)) 
+        P.append(Vector2(WIDTH/2, HEIGHT/2))
 
-        p = []
+        N = []
         for robot in robots:
-            p.append(robot.start)
+            N.append(robot.start)
 
-        letA = [p[0], p1, p[2], p3, p4, p5, p6, p[7], p8, p9, p10, p11, p12]
-        letB = [p0, p1, p[2], p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]
-        letC = [p0, p1, p2, p[3], p[4], p[5], p6, p7, p8, p9, p10, p11, p[12]]
-        letD = [p0, p1, p[2], p3, p4, p5, p[6], p7, p8, p9, p10, p11, p[12]]
-        letE = [p0, p1, p2, p[3], p[4], p[5], p6, p7, p8, p9, p10, p11, p12]
-        letF = [p0, p1, p2, p[3], p[4], p[5], p[6], p[7], p8, p9, p10, p11, p12]
-        letG = [p0, p1, p2, p[3], p4, p5, p6, p7, p8, p9, p10, p11, p12]
-        letH = [p0, p[1], p[2], p[3], p4, p5, p6, p[7], p8, p9, p10, p11, p12]
-        letI = [p[0], p1, p[2], p[3], p[4], p[5], p[6], p7, p[8], p[9], p[10], p[11], p12]
-        letJ = [p0, p1, p2, p[3], p[4], p[5], p[6], p7, p8, p[9], p[10], p[11], p12]
-        letK = [p0, p[1], p2, p3, p[4], p5, p6, p[7], p8, p9, p10, p11, p12]
-        letL = [p0, p[1], p[2], p[3], p[4], p[5], p6, p7, p8, p9, p10, p11, p[12]]
-        letM = [p[0], p[1], p[2], p3, p4, p5, p6, p[7], p8, p9, p10, p11, p12]
-        letN = [p[0], p[1], p[2], p[3], p[4], p5, p6, p[7], p8, p9, p10, p[11], p12]
-        letO = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p[12]]
-        letP = [p0, p1, p2, p3, p4, p[5], p[6], p[7], p8, p9, p10, p11, p12]
-        letQ = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]
-        letR = [p0, p1, p2, p3, p[4], p5, p6, p[7], p8, p9, p10, p11, p12]
-        letS = [p0, p1, p2, p[3], p4, p5, p6, p7, p8, p[9], p10, p11, p12]
-        letT = [p0, p1, p2, p[3], p[4], p[5], p[6], p7, p[8], p[9], p[10], p[11], p12]
-        letU = [p0, p[1], p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p[12]]
-        letV = [p0, p[1], p2, p3, p4, p5, p[6], p7, p[8], p9, p10, p11, p[12]]
-        letX = [p0, p[1], p2, p3, p[4], p5, p6, p[7], p8, p9, p[10], p11, p12]
-        letY = [p0, p[1], p2, p3, p[4], p[5], p[6], p7, p[8], p[9], p[10], p11, p12]
-        letZ = [p0, p1, p2, p3, p[4], p[5], p6, p7, p8, p9, p[10], p[11], p12]
+        letA = [N[0], P[1], N[2], P[3], P[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letB = [P[0], P[1], N[2], P[3], N[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12]]
+        letC = [P[0], P[1], P[2], N[3], N[4], N[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]
+        letD = [P[0], P[1], N[2], P[3], P[4], P[5], N[6], P[7], P[8], P[9], P[10], P[11], N[12]]
+        letE = [P[0], P[1], P[2], N[3], N[4], N[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12]]
+        letF = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letG = [P[0], P[1], P[2], N[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12]]
+        letH = [P[0], N[1], N[2], N[3], P[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letI = [N[0], P[1], N[2], N[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], N[11], P[12]]
+        letJ = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], P[7], P[8], N[9], N[10], N[11], P[12]]
+        letK = [P[0], N[1], P[2], P[3], N[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letL = [P[0], N[1], N[2], N[3], N[4], N[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]
+        letM = [N[0], N[1], N[2], P[3], P[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letN = [N[0], N[1], N[2], N[3], N[4], P[5], P[6], N[7], P[8], P[9], P[10], N[11], P[12]]
+        letO = [P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]
+        letP = [P[0], P[1], P[2], P[3], P[4], N[5], N[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letQ = [P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12]]
+        letR = [P[0], P[1], P[2], P[3], N[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
+        letS = [P[0], P[1], P[2], N[3], P[4], P[5], P[6], P[7], P[8], N[9], P[10], P[11], P[12]]
+        letT = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], N[11], P[12]]
+        letU = [P[0], N[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]
+        letV = [P[0], N[1], P[2], P[3], P[4], P[5], N[6], P[7], N[8], P[9], P[10], P[11], N[12]]
+        letX = [P[0], N[1], P[2], P[3], N[4], P[5], P[6], N[7], P[8], P[9], N[10], P[11], P[12]]
+        letY = [P[0], N[1], P[2], P[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], P[11], P[12]]
+        letZ = [P[0], P[1], P[2], P[3], N[4], N[5], P[6], P[7], P[8], P[9], N[10], N[11], P[12]]
 
         for let in letters:
             if let == 'A':
@@ -316,4 +320,5 @@ class Robot(Obstacle):
             self.goal_index += 1
             return True
         else:
+            self.goal_index = 0
             return False
