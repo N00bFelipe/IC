@@ -17,11 +17,11 @@ pygame.display.set_caption('Simulation')
 robots = []
 for i in range(13):
     if i >= 8:
-        robots.append(Robot((0.2*WIDTH, (14 - i)*HEIGHT/7), [(0, 0)], random.random()*360, color=(0, 200, 200)))
+        robots.append(Robot((0.2*WIDTH, (14 - i)*HEIGHT/7), [(0, 0)], 0, color=(0, 200, 200)))
     elif i == 0:
-        robots.append(Robot((0.2*WIDTH, HEIGHT/7), [(0, 0)], random.random()*360, color=(0, 200, 200)))
+        robots.append(Robot((0.2*WIDTH, HEIGHT/7), [(0, 0)], 0, color=(0, 200, 200)))
     else:
-        robots.append(Robot((0.8*WIDTH, i*HEIGHT/8), [(0, 0)], random.random()*360, color=(0, 200, 200)))
+        robots.append(Robot((0.8*WIDTH, i*HEIGHT/8), [(0, 0)], 0, color=(0, 200, 200)))
     robots[i].goals.pop()
 
 Robot.letters(robots, 'LUIZFELIPE')
