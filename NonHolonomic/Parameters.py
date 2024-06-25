@@ -3,7 +3,7 @@ import numpy as np
 WIDTH = 640
 HEIGHT = 480
 FPS = 60
-NUMROB = 7
+NUMROB = 1
 ORIENTATION = np.deg2rad(0)
 SIZEROBOT = 15
 RANGEGOAL = 25

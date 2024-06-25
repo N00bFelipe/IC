@@ -43,7 +43,7 @@ while True:
             if event.button == 4:
                 obstacles[mouse_ind].size += 5
             if event.button == 5:
-                if obstacles[mouse_ind].size > 5:
+                if obstacles[mouse_ind].size > 0:
                     obstacles[mouse_ind].size -= 5
                 
 
@@ -55,9 +55,9 @@ while True:
         for robot in robots:
             if robot.arrived():
                 continue
-            robot.moving(DELTAT, obstacles + robots)
-            robot.resetForce()
 
+            robot.moving(DELTAT, obstacles + robots)
+           
         if all(robot.arrived() for robot in robots):
             for robot in robots:
                 robot.resetRobot() 

@@ -45,22 +45,19 @@ class Robot(Obstacle):
     def getGoal(self):
         return self.goals[self.goal_index]
 
-    def kControl(self, futureOri):
+    def kControl(self):
         rho = self.force.length()
         alpha = self.normalizeAngle(-self.orientation + math.atan2(self.force.y, self.force.x))
-        beta = self.normalizeAngle(futureOri - math.atan2(self.force.y, self.force.x))
 
         kr = 4 * 3
         ka = 8 * 20
-        kb = -1.5 * 4
 
         if abs(alpha) > np.pi/2:
             kr = -kr       
             alpha = self.normalizeAngle(alpha-np.pi)
-            beta = self.normalizeAngle(beta-np.pi)
 
         v = kr*rho + 1*kr/math.fabs(kr)
-        w = ka*alpha + kb*beta
+        w = ka*alpha
         self.setVelocity(v) 
         self.setOmega(w)
         
@@ -68,17 +65,12 @@ class Robot(Obstacle):
         self.attForce()
         self.repForce(obstacles)
         dir = (self.front - self.position).normalize()
-
-        tempRobot = Robot(self.position + self.force, [self.goals[self.goal_index]])
-        tempRobot.attForce()
-        tempRobot.repForce(obstacles)
-
-        self.kControl(math.atan2(tempRobot.force.y, tempRobot.force.x))
-        tempRobot = None
+        self.kControl()
 
         self.position += self.velocity*dt*dir
         self.orientation = self.normalizeAngle(self.orientation + dt*self.w)
         self.front = self.position + Vector2(self.size*math.cos(self.orientation), self.size*math.sin(self.orientation))
+        self.resetForce()
 
     @staticmethod
     def normalizeAngle(angle):
@@ -145,7 +137,7 @@ class Robot(Obstacle):
         letF = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], N[7], P[8], P[9], P[10], P[11], P[12]]
         letG = [P[0], P[1], P[2], N[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], P[12]]
         letH = [P[0], N[1], N[2], N[3], P[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
-        letI = [N[0], P[1], N[2], N[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], N[11], P[12]]
+        letI = [P[0], N[1], N[2], N[3], N[4], N[5], N[6], N[7], P[8], P[9], P[10], P[11], N[12]]
         letJ = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], P[7], P[8], N[9], N[10], N[11], P[12]]
         letK = [P[0], N[1], P[2], P[3], N[4], P[5], P[6], N[7], P[8], P[9], P[10], P[11], P[12]]
         letL = [P[0], N[1], N[2], N[3], N[4], N[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]

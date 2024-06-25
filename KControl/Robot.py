@@ -45,22 +45,19 @@ class Robot(Obstacle):
         pygame.draw.circle(screen, self.color, self.position, self.size)
         pygame.draw.line(screen, (0, 0, 0), self.position, self.front, self.size//10)
 
-    def kControl(self, futureOri):
+    def kControl(self):
         rho = self.force.length()
         alpha = self.normalizeAngle(-self.orientation + math.atan2(self.force.y, self.force.x))
-        beta = self.normalizeAngle(futureOri - math.atan2(self.force.y, self.force.x))
 
         kr = 4 * 3
         ka = 8 * 20
-        kb = -1.5 * 4
 
         if abs(alpha) > np.pi/2:
             kr = -kr       
             alpha = self.normalizeAngle(alpha-np.pi)
-            beta = self.normalizeAngle(beta-np.pi)
 
         v = kr*rho + 1*kr/math.fabs(kr)
-        w = ka*alpha + kb*beta
+        w = ka*alpha
         self.setVelocity(v) 
         self.setOmega(w)
         
@@ -68,17 +65,12 @@ class Robot(Obstacle):
         self.attForce()
         self.repForce(obstacles)
         dir = (self.front - self.position).normalize()
-
-        tempRobot = Robot(self.position + self.force, [self.goals[self.goal_index]])
-        tempRobot.attForce()
-        tempRobot.repForce(obstacles)
-
-        self.kControl(math.atan2(tempRobot.force.y, tempRobot.force.x))
-        tempRobot = None
+        self.kControl()
 
         self.position += self.velocity*dt*dir
         self.orientation = self.normalizeAngle(self.orientation + dt*self.w)
         self.front = self.position + Vector2(self.size*math.cos(self.orientation), self.size*math.sin(self.orientation))
+        self.resetForce()
 
     @staticmethod
     def normalizeAngle(angle):
@@ -92,9 +84,9 @@ class Robot(Obstacle):
 
         return (int(r*255), int(g*255), int(b*255))
     
-    def repForce(self, obs, krep = 10):
+    def repForce(self, obs, krep = 30):
         for ob in obs:
-            if ob is self:
+            if ob is self or ob.size == 0:
                 continue
             v = self.position - ob.position
             d = self.distance(ob)

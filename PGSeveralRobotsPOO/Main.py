@@ -53,8 +53,9 @@ while True:
         for robot in robots:
             if robot.arrived():
                 continue
+
             robot.moving(DELTAT, obstacles + robots)
-            robot.resetForce()
+            
     else:
         screen.fill((230, 230, 230))
 

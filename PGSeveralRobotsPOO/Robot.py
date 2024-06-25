@@ -54,6 +54,7 @@ class Robot(Obstacle):
         self.toAccelerate(dt, obstacles)
         dir = self.force/np.linalg.norm(self.force)
         self.position += self.velocity*dt*dir
+        self.resetForce()
 
     def distFromAnother(self, another):
         return np.linalg.norm(self.position - another.position) - (self.size + another.size)

@@ -57,7 +57,6 @@ if __name__ == '__main__':
                 continue
 
             robot.moving(PRT.DELTAT, obstacles + robots)
-            robot.resetForce()
             
             # Mostrar trajeto 
             # ax.scatter(robot.position[0], robot.position[1], color = robot.color, s = 100*robot.size)

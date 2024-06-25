@@ -20,7 +20,7 @@ while len(robots) < NUMROB:
     if not robots or all((robot.start - start).length() > 2.5*robot.size for robot in robots):
         robots.append(Robot(start, [(0.9*WIDTH, 0.1*HEIGHT), (0.1*WIDTH, 0.8*HEIGHT), (0.9*WIDTH, 0.9*HEIGHT), start]))
 
-obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 6, 2, 25)
+obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 0, 0, 25)
 obstacles.append(Obstacle(pygame.mouse.get_pos(), 10))
 mouse_ind = len(obstacles) - 1
 
@@ -43,7 +43,7 @@ while True:
             if event.button == 4:
                 obstacles[mouse_ind].size += 5
             if event.button == 5:
-                if obstacles[mouse_ind].size > 5:
+                if obstacles[mouse_ind].size >= 0:
                     obstacles[mouse_ind].size -= 5
                 
 
@@ -55,9 +55,9 @@ while True:
         for robot in robots:
             if robot.arrived():
                 continue
-            robot.moving(DELTAT, obstacles + robots)
-            robot.resetForce()
 
+            robot.moving(DELTAT, obstacles + robots)
+            
         if all(robot.arrived() for robot in robots):
             for robot in robots:
                 robot.resetRobot() 

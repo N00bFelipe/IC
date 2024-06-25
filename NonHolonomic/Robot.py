@@ -49,6 +49,7 @@ class Robot(Obstacle):
         self.pdControl(obstacles)
         dir = (self.front - self.position).normalize()
         self.position += self.velocity*dt*dir
+        self.resetForce()
 
     @staticmethod
     def normalizeAngle(angle):
@@ -82,12 +83,12 @@ class Robot(Obstacle):
     
     def repForce(self, obs, krep = 50):
         for ob in obs:
-            if ob is self:
+            if ob is self or ob.size <= 0:
                 continue
             v = self.position - ob.position
             d = self.distance(ob)
             R = self.sensorRange
-            if d < R and ob is not self:
+            if d < R:
                 self.force += krep*(1/d**2)*((1/d)-(1/R))*(v/d)
 
     def resetRobot(self):
