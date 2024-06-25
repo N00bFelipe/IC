@@ -1,0 +1,13 @@
+import numpy as np
+
+WIDTH = 640
+HEIGHT = 480
+FPS = 60
+NUMROB = 20
+RANGEGOAL = 10
+DELTAT = 0.1
+VELMAX = 25
+VELMIN = 5
+ANGLE = np.deg2rad(80)
+ACCEMAX = 10
+SENSOR_RANGE = 35
