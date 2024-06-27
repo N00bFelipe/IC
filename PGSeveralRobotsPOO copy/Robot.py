@@ -8,20 +8,13 @@ class Robot(Obstacle):
 
     NumOfRobots = 0
 
-    def __init__(self, start, goals, size = 5, vMax = VELMAX, aMax = ACCEMAX, sensorRange = SENSOR_RANGE, color = (0, 200, 200), label = None):
+    def __init__(self, start, size = 5, vMax = VELMAX, aMax = ACCEMAX, sensorRange = SENSOR_RANGE, color = (0, 200, 200), label = None):
         Obstacle.__init__(self, start, size,  color)
         Robot.NumOfRobots += 1
-        if Robot.NumOfRobots == 1:
-            self.leader = True
-            self.color = (200, 0, 0)
-        else:
-            self.leader = False 
+        self.leader = False
         self.start = Vector2(start)
+        self.goals = []
         self.whichGoal = 0
-        if self.leader:
-            self.goals = [Vector2(goal) for goal in goals]
-        else:
-            self.goals = [Vector2(WIDTH/2, HEIGHT/2)]
         self.velocity = 0
         self.vMax = abs(vMax)
         self.aceleration = 0
@@ -38,7 +31,8 @@ class Robot(Obstacle):
             return
         
         self.setAcceleration(self.aMax)
-        if (self.position - self.goals[self.whichGoal]).length() < self.sensorRange:
+        goalIndex = self.whichGoal if self.leader else 0
+        if (self.position - self.goals[goalIndex]).length() < self.sensorRange:
             self.setAcceleration(-self.aMax)
         else:
             for obs in obstacles:
@@ -53,35 +47,52 @@ class Robot(Obstacle):
         
         if self.leader:
             for obs in obstacles:
-                if isinstance(obs, Robot) and self.distance(obs) > 5*self.sensorRange:
+                if isinstance(obs, Robot) and self.distance(obs) > RANGETOACCEFROMANOTHER:
                     self.setAcceleration(-self.aMax)
                     break
 
         self.setVelocity(max(min(self.velocity + self.aceleration*dt, self.vMax), VELMIN))
 
-    def arrived(self):
-        if (self.position - self.goals[self.whichGoal]).length() < RANGEGOAL and self.whichGoal == len(self.goals) - 1 and self.leader:
-            return True
-        if (self.position - self.goals[self.whichGoal]).length() < RANGEGOAL:
-            self.whichGoal += 1 if self.whichGoal + 1 < len(self.goals) else 0
-            return False
+    def arrived(self, robots):
+        if self.leader:
+            if (self.position - self.goals[self.whichGoal]).length() < RANGEGOAL:
+                self.changeLeader(robots)
         
-    def attForce(self, katt = 0.001):
-        self.force = katt*(self.goals[self.whichGoal] - self.position)
+    def attForce(self, katt = 0.0002):
+        if self.leader:
+            self.force = 5*katt*(self.goals[self.whichGoal] - self.position)
+        else:
+            self.force = katt*(self.goals[0] - self.position)
 
     def distance(self, another):
         return (self.position - another.position).length() - (self.size + another.size)
     
     def draw(self, screen):
         self.front = self.position + Vector2(self.size*np.cos(self.orientation), self.size*np.sin(self.orientation))
-        pygame.draw.circle(screen, self.color, self.position, self.size)
+        if self.leader:
+            pygame.draw.circle(screen, (200, 0, 0), self.position, self.size)
+        else:
+            pygame.draw.circle(screen, self.color, self.position, self.size)
         pygame.draw.line(screen, (0, 0, 0), self.position, self.front, self.size//5)
 
-    def moving(self, dt, obstacles):
-        self.setGoal(obstacles)
+    def changeLeader(self, robots):
+        if robots.index(self) + 1 >= len(robots):
+            robots[0].leader = True
+        else:
+            robots[robots.index(self) + 1].leader = True
+        self.leader = False
+        if self.whichGoal + 1 < len(self.goals):
+            self.whichGoal += 1
+        else:
+            self.whichGoal = 0
+
+    def moving(self, dt, robots, obstacles, goals):
+        self.setLeader(robots)
+        self.setGoals(robots, goals)
+        self.arrived(robots)
         self.attForce()
-        self.repForce(obstacles)
-        self.accelerate(dt, obstacles)
+        self.repForce(robots + obstacles)
+        self.accelerate(dt, robots + obstacles)
         self.position += self.velocity*dt*self.force.normalize()
         self.orientation = np.arctan2(self.force.y, self.force.x)
         self.resetForce()
@@ -108,12 +119,20 @@ class Robot(Obstacle):
     def setAcceleration(self, a):
         self.aceleration = a if abs(a) <= self.aMax else self.aMax*a/abs(a)
 
-    def setGoal(self, objects):
-        if not self.leader:
-            for obj in objects:
-                if isinstance(obj, Robot) and obj.leader:
-                    self.goals[self.whichGoal] = obj.position + (obj.position - obj.goals[obj.whichGoal]).normalize()*5*obj.size
-
+    def setGoals(self, robots, goals):
+        if self.leader:
+            self.goals = goals
+        else:
+            for robot in robots:
+                if robot.leader:
+                    temp = robot
+                    break
+            self.goals = [temp.position + (temp.position - temp.goals[temp.whichGoal]).normalize()*DISTLIDER] 
+    
+    @staticmethod
+    def setLeader(robots):
+        if all(not robot.leader for robot in robots):
+            robots[0].leader = True
 
     def setVelocity(self, v):
         self.velocity = min(abs(v), self.vMax)

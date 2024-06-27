@@ -17,9 +17,10 @@ pygame.display.set_caption('Simulation')
 robots = []
 while len(robots) < NUMROB:
     start = (0.20*WIDTH*np.random.rand(), HEIGHT*np.random.rand())
-    robots.append(Robot(start, [(0.9*WIDTH, 0.1*HEIGHT), (0.1*WIDTH, 0.9*HEIGHT), (0.9*WIDTH, 0.9*HEIGHT), start]))
+    robots.append(Robot(start))
 
-obstacles =  Obstacle.matrix([0.35*WIDTH, HEIGHT], [0.65*WIDTH, 0], 10, 2, 17)
+goals = [(0.9*WIDTH, 0.1*HEIGHT), (0.1*WIDTH, 0.9*HEIGHT), (0.9*WIDTH, 0.9*HEIGHT)]
+obstacles =  Obstacle.matrix([0.35*WIDTH, HEIGHT], [0.65*WIDTH, 0], 10, 2, 16)
 obstacles.append(Obstacle(pygame.mouse.get_pos(), 10))
 mouse_ind = len(obstacles) - 1
 
@@ -52,10 +53,7 @@ while True:
         screen.fill((255, 255, 255))
 
         for robot in robots:
-            if robot.arrived():
-                continue
-
-            robot.moving(DELTAT, obstacles + robots)
+            robot.moving(DELTAT, robots, obstacles, goals)
             
     else:
         screen.fill((230, 230, 230))
@@ -64,7 +62,7 @@ while True:
         if isinstance(obj, Robot):
             obj.draw(screen)
             pygame.draw.rect(screen, obj.color, (*obj.start, 10, 10))
-            for goal, i in zip(obj.goals, range(len(obj.goals) - 1)):
+            for goal in goals:  
                 pygame.draw.rect(screen, (255, 223, 0), (*goal, 10, 10))
         else:
             pygame.draw.circle(screen, obj.color, obj.position, obj.size)
