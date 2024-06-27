@@ -24,7 +24,7 @@ for i in range(13):
         robots.append(Robot((0.8*WIDTH, i*HEIGHT/8), [(0, 0)], 0, color=(0, 200, 200)))
     robots[i].goals.pop()
 
-Robot.letters(robots, 'MARCIALUCIA')
+Robot.letters(robots, 'WILLIAM')
 
 obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 0, 0, 25)
 obstacles.append(Obstacle(pygame.mouse.get_pos(), 10))

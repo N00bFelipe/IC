@@ -3,7 +3,7 @@ import numpy as np
 WIDTH = 640
 HEIGHT = 480
 FPS = 60
-NUMROB = 20
+NUMROB = 15
 RANGEGOAL = 10
 DELTAT = 0.1
 VELMAX = 25

@@ -20,7 +20,7 @@ while len(robots) < NUMROB:
     if not robots or all((robot.start - start).length() > 2.5*robot.size for robot in robots):
         robots.append(Robot(start, [(0.9*WIDTH, 0.1*HEIGHT), (0.1*WIDTH, 0.8*HEIGHT), (0.9*WIDTH, 0.9*HEIGHT), start]))
 
-obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 0, 0, 25)
+obstacles =  Obstacle.matrix((0.35*WIDTH, HEIGHT), (0.65*WIDTH, 0), 5, 2, 25)
 obstacles.append(Obstacle(pygame.mouse.get_pos(), 10))
 mouse_ind = len(obstacles) - 1
 

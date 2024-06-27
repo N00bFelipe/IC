@@ -151,6 +151,7 @@ class Robot(Obstacle):
         letT = [P[0], P[1], P[2], N[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], N[11], P[12]]
         letU = [P[0], N[1], P[2], P[3], P[4], P[5], P[6], P[7], P[8], P[9], P[10], P[11], N[12]]
         letV = [P[0], N[1], P[2], P[3], P[4], P[5], N[6], P[7], N[8], P[9], P[10], P[11], N[12]]
+        letW = [P[0], N[1], P[2], P[3], P[4], P[5], N[6], N[7], N[8], P[9], P[10], P[11], P[12]]
         letX = [P[0], N[1], P[2], P[3], N[4], P[5], P[6], N[7], P[8], P[9], N[10], P[11], P[12]]
         letY = [P[0], N[1], P[2], P[3], N[4], N[5], N[6], P[7], N[8], N[9], N[10], P[11], P[12]]
         letZ = [P[0], P[1], P[2], P[3], N[4], N[5], P[6], P[7], P[8], P[9], N[10], N[11], P[12]]
@@ -286,6 +287,12 @@ class Robot(Obstacle):
                 for robot, i in zip(robots, range(len(robots))):
                     if i < len(letV):
                         robot.goals.append(letV[i])
+                    else:
+                        robot.goals.append(robot.start)
+            elif let == 'W':
+                for robot, i in zip(robots, range(len(robots))):
+                    if i < len(letW):
+                        robot.goals.append(letW[i])
                     else:
                         robot.goals.append(robot.start)
             elif let == 'X':
