@@ -14,7 +14,10 @@ pygame.display.set_caption('Simulation')
 
 robots = []
 while len(robots) < NUMROB:
-        robots.append(Robot((WIDTH*random.random(), HEIGHT*random.random())))
+    if len(robots) > NUMROB//2:
+        robots.append(Robot((WIDTH*random.random(), HEIGHT*random.random()), (-BIAS, 0), color = (0, 200, 200)))
+    else:
+        robots.append(Robot((WIDTH*random.random(), HEIGHT*random.random()), (BIAS, 0), color = (255, 0, 0)))
 
 while True:
     clock.tick(FPS)
@@ -35,6 +38,11 @@ while True:
             
     else:
         screen.fill((20, 20, 20))
+ 
+    pygame.draw.line(screen, (255, 255, 255), (MARGIN, MARGIN), (WIDTH - MARGIN, MARGIN))
+    pygame.draw.line(screen, (255, 255, 255), (WIDTH - MARGIN, MARGIN), (WIDTH - MARGIN, HEIGHT - MARGIN))
+    pygame.draw.line(screen, (255, 255, 255), (WIDTH - MARGIN, HEIGHT - MARGIN), (MARGIN, HEIGHT - MARGIN))
+    pygame.draw.line(screen, (255, 255, 255), (MARGIN, HEIGHT - MARGIN), (MARGIN, MARGIN))
 
     for robot in robots:
         robot.draw(screen)

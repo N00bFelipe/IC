@@ -6,14 +6,14 @@ import numpy as np
 
 class Robot(Obstacle):
 
-    def __init__(self, start, size = SIZEROBOT, sensorRange = SENSOR_RANGE, sensorAngle = SENSOR_ANGLE, color = (0, 200, 200), label = None):
+    def __init__(self, start, bias, size = SIZEROBOT, sensorAngle = SENSOR_ANGLE, color = (0, 200, 200), label = None):
         Obstacle.__init__(self, start, size, color)
+        self.bias = Vector2(bias)
         self.start = Vector2(start)
         self.velocity = Vector2(np.random.random()*VELMAX/2 - VELMAX/4, np.random.random()*VELMAX/2 - VELMAX/4)
         self.orientation = np.arctan2(self.velocity.y, self.velocity.x)
         self.front = self.position + Vector2(self.size*np.cos(self.orientation), self.size*np.sin(self.orientation))
         self.label = 'Robot' if label == None else label
-        self.sensorRange = sensorRange
         self.sensorAngle = sensorAngle
 
     def angle(self, robot):
@@ -23,9 +23,12 @@ class Robot(Obstacle):
         move = Vector2(0, 0)
 
         for robot in robots:
-            if self.inRange(robot) and robot is not self:
-                if self.distance(robot) < MIN_DISTANCE:
-                    move += self.position - robot.position
+            # if self.inRange(robot) and robot is not self:
+            if self.distance(robot) < SENSOR_RANGE_MIN:
+                if self.distance(robot) < 3*self.size and self.distance(robot) > 0:
+                    self.setVelocity(self.velocity.length()*(self.position - robot.position).normalize())
+                move += self.position - robot.position
+                
 
         self.setVelocity(self.velocity + move*AVOID_FACTOR)
         
@@ -52,7 +55,7 @@ class Robot(Obstacle):
             self.setVelocity(self.velocity + (center - self.position)*CENTERING_FACTOR)
             
     def inRange(self, robot):
-        if self.distance(robot) < self.sensorRange and np.fabs(self.angle(robot)) < self.sensorAngle:
+        if self.distance(robot) < SENSOR_RANGE_MAX and self.distance(robot) > SENSOR_RANGE_MIN  and np.fabs(self.angle(robot)) < self.sensorAngle:
             return True
         return False 
     
@@ -87,7 +90,10 @@ class Robot(Obstacle):
         self.position += self.velocity*dt  
 
     def setVelocity(self, velocity):
-        if velocity.length() <= VELMAX:
-            self.velocity = velocity
-        else:
+        velocity = velocity + self.bias
+        if velocity.length() > VELMAX:
             self.velocity = VELMAX*velocity.normalize()
+        elif velocity.length() < VELMAX/3:
+            self.velocity = (VELMAX/3)*velocity.normalize()
+        else:
+            self.velocity = velocity
