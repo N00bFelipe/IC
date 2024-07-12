@@ -3,7 +3,7 @@ import numpy as np
 WIDTH = 800
 HEIGHT = 600
 FPS = 90
-NUMROB = 25
+NUMROB = 100
 SIZEROBOT = 5
 DELTAT = 0.1 #1
 MARGIN = 100 #200
