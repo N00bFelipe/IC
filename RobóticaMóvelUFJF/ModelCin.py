@@ -4,30 +4,30 @@ from sys import exit
 import numpy as np
 
 escala = 150
-r = escala*((1/2) + (195/1000))
-l = escala*((1/2) + (381/1000))
+r = escala*((1/2) * (195/1000))
+l = escala*((1/2) * (381/1000))
 
-corpo = escala* np.array([[100   , -190.5],      
+corpo = np.array([[100   , -190.5],      
                   [227.5 , -50   ],
                   [227.5 , 50    ],
                   [100   , 190.5 ],
                   [-200  , 190.5 ],
                   [-227.5, 163   ],
                   [-227.5, -163  ],
-                  [-200  , -190.5]])/1000
-corpo = np.hstack((corpo, np.ones((corpo.shape[0], 1))))
+                  [-200  , -190.5]])*(escala/1000)
+corpo = np.hstack((corpo, np.ones((corpo.shape[0], 1)))).T
 
-rodaE = escala*np.array([[ 97.5, 170.5],
+rodaE = np.array([[ 97.5, 170.5],
                   [ 97.5, 210.5],
                   [-97.5, 210.5],
-                  [-97.5 , 170.5]])/1000
-rodaE = np.hstack((rodaE, np.ones((rodaE.shape[0], 1))))
+                  [-97.5, 170.5]])*(escala/1000)
+rodaE = np.hstack((rodaE, np.ones((rodaE.shape[0], 1)))).T
 
-rodaD = escala*np.array([[ 97.5, -170.5],
+rodaD = np.array([[ 97.5, -170.5],
                   [ 97.5, -210.5],
                   [-97.5, -210.5],
-                  [-97.5 , -170.5]])/1000
-rodaD = np.hstack((rodaD, np.ones((rodaD.shape[0], 1))))
+                  [-97.5, -170.5]])*(escala/1000)
+rodaD = np.hstack((rodaD, np.ones((rodaD.shape[0], 1)))).T
 
 def T(deltaX, deltaY):
     return np.array([[1, 0, deltaX],
@@ -40,23 +40,15 @@ def Rz2D(theta):
                      [ 0            ,  0            , 1 ]])
 
 def draw(surface, P):
-    pontos = []
-    for ponto in corpo:
-        P_rot = ponto.T @ Rz2D(-P[2])
-        pontos.append((P[0] + P_rot[0], P[1] + P_rot[1]))
-    pygame.draw.polygon(surface, (38, 132, 252), pontos)
+    TR = T(P[0], P[1]) @ Rz2D(P[2])
+    pontos = (TR @ corpo).T
+    pygame.draw.polygon(surface, (38, 132, 252), pontos[:,:2])
 
-    pontos = []
-    for ponto in rodaD:
-        P_rot = ponto.T @ Rz2D(-P[2])
-        pontos.append((P[0] + P_rot[0], P[1] + P_rot[1]))
-    pygame.draw.polygon(surface, (0, 0, 0), pontos)
+    pontos = (TR @ rodaD).T
+    pygame.draw.polygon(surface, (0, 0, 0), pontos[:,:2])
 
-    pontos = []
-    for ponto in rodaE:
-        P_rot = ponto.T @ Rz2D(-P[2])
-        pontos.append((P[0] + P_rot[0], P[1] + P_rot[1]))
-    pygame.draw.polygon(surface, (0, 0, 0), pontos)
+    pontos = (TR @ rodaE).T
+    pygame.draw.polygon(surface, (0, 0, 0), pontos[:,:2])
 
     pygame.draw.circle(surface, (0, 0, 0), (P[0:2]), 3)
 
@@ -67,10 +59,10 @@ paused = True
 HEIGHT = pygame.display.Info().current_h - 60
 WIDTH = pygame.display.Info().current_w
 FPS = 60
-P = np.array([WIDTH/2, HEIGHT/2, np.deg2rad(0)])
+P = np.array([WIDTH/2, HEIGHT/2, np.deg2rad(90)])
 dt = 0.1
-wr = np.deg2rad(0)
-wl = np.deg2rad(10)
+wr = np.deg2rad(10)
+wl = np.deg2rad(50)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), RESIZABLE)
 pygame.display.set_caption('Simulation')

@@ -56,6 +56,17 @@ class Robot(Obstacle):
             return True
         return False 
     
+
+
+
+
+#olaaa
+
+
+
+
+
+
     def keep_within_bounds(self):
         if self.position[0] < MARGIN:
             self.setVelocity(np.array([self.velocity[0] + TURN_FACTOR, self.velocity[1]]))
