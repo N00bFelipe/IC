@@ -39,10 +39,10 @@ def Rz2D(theta):
                      [ np.sin(theta),  np.cos(theta), 0 ],
                      [ 0            ,  0            , 1 ]])
 
-def draw(surface, P):
+def draw(surface, P, color):
     TR = T(P[0], P[1]) @ Rz2D(P[2])
     pontos = (TR @ corpo).T
-    pygame.draw.polygon(surface, (38, 132, 252), pontos[:,:2])
+    pygame.draw.polygon(surface, color, pontos[:,:2])
 
     pontos = (TR @ rodaD).T
     pygame.draw.polygon(surface, (0, 0, 0), pontos[:,:2])
@@ -59,15 +59,16 @@ paused = True
 HEIGHT = pygame.display.Info().current_h - 60
 WIDTH = pygame.display.Info().current_w
 FPS = 60
-P = np.array([WIDTH/2, HEIGHT/2, np.deg2rad(90)])
-dt = 0.1
-wr = np.deg2rad(10)
+Pdif = Pinc = np.array([WIDTH/2, HEIGHT/2, np.deg2rad(90)])
+dt = 1
+wr = np.deg2rad(40)
 wl = np.deg2rad(50)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), RESIZABLE)
 pygame.display.set_caption('Simulation')
 
-trajeto = [(P[0], P[1])]
+trajetoDif = [(Pdif[0], Pdif[1])]
+trajetoInc = trajetoDif
 while True:
     clock.tick(FPS)
     
@@ -85,19 +86,34 @@ while True:
         v = (r/2)*(wl + wr)      
         w = (r/(2*l))*(wl - wr) # (wl - wr) = -1*(wr - wl), isso foi feito dado o eixo y apontando para baixo no display
 
-        dP = np.array([v * np.cos(P[2]),
-                       v * np.sin(P[2]),
+        # Modelo diferencial
+        dP = np.array([v * np.cos(Pdif[2]),
+                       v * np.sin(Pdif[2]),
                        w])
 
-        P = P + dP*dt
+        Pdif = Pdif + dP*dt
         
-        trajeto.append((P[0], P[1]))
+        trajetoDif.append((Pdif[0], Pdif[1]))
+
+        # Modelo incremental
+        deltaS = v*dt
+        deltath = w*dt
+
+        dP = np.array([deltaS*np.cos(Pinc[2] + deltath/2),
+                       deltaS*np.sin(Pinc[2] + deltath/2),
+                       deltath])
             
+        Pinc = Pinc + dP
+
+        trajetoInc.append((Pinc[0], Pinc[1]))
     else:
         screen.fill((220, 220, 220))
  
-    for ponto in trajeto:
-        pygame.draw.circle(screen, (255, 0, 0), ponto, 2)
-    draw(screen, P)
+    for ponto1, ponto2 in zip(trajetoInc, trajetoDif):
+        pygame.draw.circle(screen, (46, 160, 67), ponto1, 2)
+        pygame.draw.circle(screen, (38, 132, 252), ponto2, 2)
+
+    draw(screen, Pinc, (46, 160, 67))
+    draw(screen, Pdif, (38, 132, 252))
 
     pygame.display.flip()
