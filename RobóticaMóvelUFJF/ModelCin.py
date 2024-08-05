@@ -58,9 +58,9 @@ paused = True
 
 HEIGHT = pygame.display.Info().current_h - 60
 WIDTH = pygame.display.Info().current_w
-FPS = 60
+FPS = 160
 Pdif = Pinc = np.array([WIDTH/2, HEIGHT/2, np.deg2rad(90)])
-dt = 1
+dt = 0.1
 wr = np.deg2rad(40)
 wl = np.deg2rad(50)
 
